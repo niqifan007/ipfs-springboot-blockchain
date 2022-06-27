@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 @Service
 public class IPFSService implements FileServiceImpl {
@@ -63,6 +60,38 @@ public class IPFSService implements FileServiceImpl {
             return ipfs.cat(filePointer);
         } catch (IOException ex) {
             throw new RuntimeException("Error whilst communicating with the IPFS node", ex);
+        }
+    }
+
+    @Override
+    public void download(String hash, String destFile) {
+        IPFS ipfs = ipfsConfig.ipfs;
+        byte[] data = null;
+        try {
+            data = ipfs.cat(Multihash.fromBase58(hash));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (data != null && data.length > 0) {
+            File file = new File(destFile);
+            if (file.exists()) {
+                file.delete();
+            }
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(file);
+                fos.write(data);
+                fos.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
         }
     }
 

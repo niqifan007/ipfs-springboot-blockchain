@@ -36,4 +36,11 @@ public class IPFSController {
 
     }
 
+    @GetMapping(value = "file/{hash}/{destFile}")
+    public void downloadFile(@PathVariable("hash") String hash, @PathVariable("destFile") String destFile) {
+        ipfsService.download(hash, destFile);
+
+    }
+
+
 }
